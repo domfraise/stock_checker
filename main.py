@@ -7,21 +7,45 @@ from bs4 import BeautifulSoup
 stock_informer_base = "https://www.stockinformer.co.uk/"
 
 ps5 = stock_informer_base + "checker-ps5-playstation-5-console"
+zen3 = stock_informer_base + "checker-amd-ryzen-5000-zen-3-cpu"
+series_x = stock_informer_base + "checker-xbox-series-x"
 webhook = "https://maker.ifttt.com/trigger/Webhook_triggered/with/key/G2byZ4ydAByE8QhVTnbPi"
 
-def open_browser(name):
-    html = requests.get(ps5).content
-    # print(html)
-    soup = BeautifulSoup(html, 'html5lib')
-    rows = soup.find(id="TblProduct1").contents[0].contents
-    # print(rows[3])
+def check_stock(product_page_link, products_to_watch):
+    raw = requests.get(product_page_link).content
+    html = BeautifulSoup(raw, 'html5lib')
+    products_to_check = products_to_watch
     in_stock = []
-    for row in rows[2:]:
+    for product in products_to_check:
+        product_table_id = "TblProduct" + str(product)
+        in_stock.extend(find_instock_sites_for_product(product_table_id, html))
+
+    filtered_alerts = [item for item in in_stock if "StockX" not in item and "Ebay" not in item]
+    print(product_page_link, filtered_alerts)
+    return filtered_alerts
+
+
+def send_webhook(data_to_send):
+    if len(data_to_send) > 0:
+        if (len(data_to_send) == 1):
+            json = {"value1": data_to_send[0], }
+        elif (len(data_to_send) == 2):
+            json = {"value1": data_to_send[0], "value2": data_to_send[1], }
+        elif (len(data_to_send) == 3):
+            json = {"value1": data_to_send[0], "value2": data_to_send[1], "value3": data_to_send[2], }
+        else:
+            json = {"value1": ("\n".join(data_to_send)), }
+
+        requests.post(webhook, data=json)
+
+
+def find_instock_sites_for_product(product_table_id, soup):
+    rows = soup.find(id=product_table_id).contents[0].contents
+    in_stock = []
+    for row in rows[2:]:  # ignore product name and whitespace row
         try:
-            # print(row.prettify())
             link = stock_informer_base + row.find_all("a")[0].get("href")
             site = row.find_all("img")[0].get("alt")
-            print(site, link)
             metadata = ""
             for s in row.stripped_strings:
                 metadata += s + " - "
@@ -29,23 +53,14 @@ def open_browser(name):
                     in_stock.append(site + " - " + link + " - " + metadata)
         except:
             continue
-
-    filtered_alerts = [item for item in in_stock if "StockX" not in item and "Ebay" not in item]
-    print(filtered_alerts)
-    if len(filtered_alerts) > 0:
-        if(len(filtered_alerts) == 1):
-            json = {"value1": in_stock[0], }
-        elif(len(filtered_alerts) == 2):
-            json = {"value1": in_stock[0], "value2": in_stock[1], }
-        elif(len(filtered_alerts) == 3):
-            json = {"value1": in_stock[0], "value2": in_stock[1], "value3": in_stock[2], }
-        else:
-            json = {"value1": str(in_stock), }
-
-        requests.post(webhook, data=json)
-
+    return in_stock
 
 
 if __name__ == '__main__':
-    open_browser('PyCharm')
+    all_stock = []
+    all_stock.extend(check_stock(ps5, [1, 2]))
+    all_stock.extend(check_stock(zen3, [1,2]))
+    all_stock.extend(check_stock(series_x, [1]))
+
+    send_webhook(all_stock)
 
