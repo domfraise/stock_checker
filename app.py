@@ -56,7 +56,8 @@ def find_instock_sites_for_product(product_table_id, soup):
     return in_stock
 
 
-if __name__ == '__main__':
+
+def handler(event, context):
     print("running")
     all_stock = []
     all_stock.extend(check_stock(ps5, [1, 2]))

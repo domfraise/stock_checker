@@ -1,11 +1,12 @@
-FROM python:3.8-slim-buster
+FROM public.ecr.aws/lambda/python:3.8
 
 WORKDIR /app
 
-COPY main.py main.py
+COPY app.py app.py
 
 RUN pip3 install requests
 RUN pip3 install beautifulsoup4
 RUN pip3 install html5lib
 
-CMD ["python3", "main.py"]
+
+CMD [ "app.handler" ]
