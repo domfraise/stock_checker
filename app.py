@@ -1,6 +1,7 @@
 
 
 import requests
+import time
 
 from bs4 import BeautifulSoup
 
@@ -57,12 +58,19 @@ def find_instock_sites_for_product(product_table_id, soup):
 
 
 
-def handler(event, context):
+def check_all_stock():
     print("Checking stock...")
     all_stock = []
     all_stock.extend(check_stock(ps5, [1, 2]))
-    all_stock.extend(check_stock(zen3, [1,2]))
-    all_stock.extend(check_stock(series_x, [1]))
-
+    all_stock.extend(check_stock(zen3, [1, 2]))
+    # all_stock.extend(check_stock(series_x, [1]))
     send_webhook(all_stock)
 
+
+def handler(event, context):
+    start = time.time()
+    while time.time() - start < 60:
+        check_all_stock()
+
+if __name__ == '__main__':
+    handler(None, None)
