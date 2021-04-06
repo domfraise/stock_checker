@@ -41,7 +41,13 @@ def send_webhook(data_to_send):
 
 
 def find_instock_sites_for_product(product_table_id, soup):
-    rows = soup.find(id=product_table_id).contents[0].contents
+    table = soup.find(id=product_table_id)
+    try:
+        rows = table.contents[0].contents
+    except:
+        print("Error parsing product table")
+        print(table)
+        return
     in_stock = []
     for row in rows[2:]:  # ignore product name and whitespace row
         try:
