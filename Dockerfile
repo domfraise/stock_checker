@@ -11,6 +11,12 @@ RUN pip3 install selenium
 RUN yum install wget -y
 RUN yum install tar -y
 RUN yum install gzip -y
+RUN yum install bzip2 -y
+
+RUN wget -O- "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" | tar -jx -C /usr/local/ \
+  && ln -s /usr/local/firefox/firefox /usr/bin/firefox
+
+
 # Gecko Driver
 ENV GECKODRIVER_VERSION 0.29.0
 RUN wget --no-verbose -O /tmp/geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/v$GECKODRIVER_VERSION/geckodriver-v$GECKODRIVER_VERSION-linux64.tar.gz \
