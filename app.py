@@ -1,9 +1,10 @@
 
 
 import requests
-import time
+from selenium import webdriver
 
 from bs4 import BeautifulSoup
+from selenium.webdriver.firefox.options import Options
 
 stock_informer_base = "https://www.stockinformer.co.uk/"
 
@@ -12,9 +13,17 @@ zen3 = stock_informer_base + "checker-amd-ryzen-5000-zen-3-cpu"
 series_x = stock_informer_base + "checker-xbox-series-x"
 webhook = "https://maker.ifttt.com/trigger/Webhook_triggered/with/key/G2byZ4ydAByE8QhVTnbPi"
 
+
+options = Options()
+options.add_argument("--headless")
+driver = webdriver.Firefox(options=options)
+
 def check_stock(product_page_link, products_to_watch):
-    raw = requests.get(product_page_link).content
-    html = BeautifulSoup(raw, 'html5lib')
+
+    driver.get(product_page_link)
+    response = driver.page_source
+
+    html = BeautifulSoup(response, 'html5lib')
     products_to_check = products_to_watch
     in_stock = []
     for product in products_to_check:
@@ -46,8 +55,8 @@ def find_instock_sites_for_product(product_table_id, soup):
         rows = table.contents[0].contents
     except:
         print("Error parsing product table")
-        print(table)
-        return
+        print(soup.contents)
+        return []
     in_stock = []
     for row in rows[2:]:  # ignore product name and whitespace row
         try:
@@ -74,9 +83,12 @@ def check_all_stock():
 
 
 def handler(event, context):
-    start = time.time()
-    while time.time() - start < 60:
+
+    try:
         check_all_stock()
+    finally:
+        driver.close()
+    print("done!!")
 
 if __name__ == '__main__':
     handler(None, None)
