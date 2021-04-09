@@ -62,4 +62,4 @@ COPY . $APP_HOME/
 
 CMD tail -f /dev/null
 
-CMD [ "python3", "app.py"]
+CMD [ "app.handler" ]
