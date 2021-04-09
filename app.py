@@ -4,7 +4,7 @@ import requests
 from selenium import webdriver
 
 from bs4 import BeautifulSoup
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 
 stock_informer_base = "https://www.stockinformer.co.uk/"
 
@@ -14,11 +14,9 @@ series_x = stock_informer_base + "checker-xbox-series-x"
 webhook = "https://maker.ifttt.com/trigger/Webhook_triggered/with/key/G2byZ4ydAByE8QhVTnbPi"
 
 
-options = Options()
-options.add_argument("--headless")
-driver = webdriver.Firefox(options=options, service_log_path='/tmp/geckodriver.log')
 
-def check_stock(product_page_link, products_to_watch):
+
+def check_stock(product_page_link, products_to_watch, driver):
 
     driver.get(product_page_link)
     response = driver.page_source
@@ -73,19 +71,22 @@ def find_instock_sites_for_product(product_table_id, soup):
 
 
 
-def check_all_stock():
+def check_all_stock(driver):
     print("Checking stock...")
     all_stock = []
-    all_stock.extend(check_stock(ps5, [1, 2]))
-    all_stock.extend(check_stock(zen3, [1, 2]))
+    all_stock.extend(check_stock(ps5, [1, 2], driver))
+    all_stock.extend(check_stock(zen3, [1, 2], driver))
     # all_stock.extend(check_stock(series_x, [1]))
     send_webhook(all_stock)
 
 
 def handler(event, context):
+    options = Options()
+    options.headless = True
+    driver = webdriver.Chrome(chrome_options=options, service_log_path="/tmp", executable_path="/usr/bin/chromedriver")
 
     try:
-        check_all_stock()
+        check_all_stock(driver)
     finally:
         driver.close()
     print("done!!")
