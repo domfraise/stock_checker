@@ -57,8 +57,14 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV PYTHONUNBUFFERED=1
 
-COPY app.py ./
+
+ENV APP_HOME /usr/src/app
+WORKDIR $APP_HOME
+
+COPY . $APP_HOME/
 
 CMD tail -f /dev/null
+
+ENTRYPOINT [ "/usr/bin/python", "-m", "awslambdaric" ]
 
 CMD [ "app.handler" ]
