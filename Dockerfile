@@ -1,12 +1,13 @@
 FROM public.ecr.aws/ubuntu/ubuntu:18.04_edge
 
 RUN apt-get update && apt-get install -y \
-    python3 python3-pip \
+    python3.8 python3-pip \
     fonts-liberation libappindicator3-1 libasound2 libatk-bridge2.0-0 \
     libnspr4 libnss3 lsb-release xdg-utils libxss1 libdbus-glib-1-2 \
     curl unzip wget libgbm1 \
     xvfb
 
+RUN ln -s /usr/bin/python3.8 /usr/bin/python
 
 # install geckodriver and firefox
 
@@ -52,6 +53,7 @@ RUN pip3 install pyvirtualdisplay
 RUN pip3 install requests
 RUN pip3 install beautifulsoup4
 RUN pip3 install html5lib
+RUN pip3 install awslambdaric
 
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
