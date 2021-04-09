@@ -16,7 +16,7 @@ webhook = "https://maker.ifttt.com/trigger/Webhook_triggered/with/key/G2byZ4ydAB
 
 options = Options()
 options.add_argument("--headless")
-driver = webdriver.Firefox(options=options, log_path='/tmp/geckodriver.log')
+driver = webdriver.Firefox(options=options, service_log_path='/tmp/geckodriver.log')
 
 def check_stock(product_page_link, products_to_watch):
 
